@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./menus_back
+    command: python3 ./menus_back/manage.py runserver 0.0.0.0:8000
+    expose:
+      - 8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "81:80"
+    depends_on:
+      - web
+    volumes:
+      - .:/code
