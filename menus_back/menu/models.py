@@ -14,6 +14,12 @@ class Menu(models.Model):
 
 class MenuItemType(models.Model):
     name = models.CharField(max_length=256)
+    description = models.TextField(null=True, blank=True)
+    image = models.ImageField(
+        upload_to='categories/images',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Тип позиции меню'
@@ -26,7 +32,7 @@ class MenuItemType(models.Model):
 class MenuItem(models.Model):
     name = models.CharField(max_length=256)
     menu = models.ForeignKey(Menu, on_delete=models.RESTRICT)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     enabled = models.BooleanField(default=True)
     item_type = models.ForeignKey(
         MenuItemType,
@@ -37,15 +43,21 @@ class MenuItem(models.Model):
 
     class Meta:
         verbose_name = 'Позициия меню'
-        ordering = ['id']
+        ordering = ['item_type', 'id']
 
     def __str__(self):
         return self.name
 
 
 class MenuItemPicture(models.Model):
-    image = models.ImageField()
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    image = models.ImageField(
+        upload_to='items/images'
+    )
+    menu_item = models.ForeignKey(
+        MenuItem,
+        on_delete=models.CASCADE,
+        related_name='images',
+    )
     enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=0)
 
