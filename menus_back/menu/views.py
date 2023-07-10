@@ -15,6 +15,28 @@ class GetMenuMixin:
         return menu_models.Menu.objects.first()
 
 
+class MenuParamsView(views.APIView, GetMenuMixin):
+
+    def get(self, request, format=None):
+        menu = self.menu
+
+        currency_data = None
+        if menu.currency:
+            currency_data = {
+                'char_code': menu.currency.char_code,
+                'sign': menu.currency.sign,
+                'from_left': menu.currency.from_left,
+                'separated': menu.currency.separated,
+            }
+
+        return response.Response({
+            'id': menu.id,
+            'name': menu.name,
+            'enabled': menu.enabled,
+            'currency': currency_data,
+        })
+
+
 class MenuListView(views.APIView, GetMenuMixin):
 
     def get(self, request, format=None):

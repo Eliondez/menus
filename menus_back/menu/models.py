@@ -4,6 +4,8 @@ from django.db import models
 class Menu(models.Model):
     name = models.CharField(max_length=256)
     enabled = models.BooleanField(default=True)
+    currency = models.ForeignKey('Currency', on_delete=models.RESTRICT, null=True)
+
 
     class Meta:
         verbose_name = 'Меню'
@@ -64,3 +66,18 @@ class MenuItemPicture(models.Model):
     class Meta:
         verbose_name = 'Картинка позиции меню'
         ordering = ['order', 'pk']
+
+
+class Currency(models.Model):
+    char_code = models.CharField(max_length=8, primary_key=True)
+    sign = models.CharField(max_length=1, blank=True)
+    from_left = models.BooleanField(default=True, blank=True)
+    separated = models.BooleanField(default=True, blank=True)
+
+    def __str__(self):
+        return f'{self.char_code} ({self.sign})'
+
+
+class Restaurant(models.Model):
+    name = models.CharField(max_length=256)
+    enabled = models.BooleanField(default=True, blank=True)

@@ -24,10 +24,8 @@ from menu import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/menu/', views.MenuListView.as_view()),
+    path('api/menu/detail/', views.MenuParamsView.as_view()),
     path('api/menu/categories/', views.MenuCategoryListView.as_view()),
-    # path('api/menu/dump/', views.MenuDump.as_view()),
-    # path('api/menu/load/', views.MenuLoad.as_view()),
-    # path('api/menu/clear/', views.MenuClear.as_view()),
 ]
 
 if settings.DEBUG:

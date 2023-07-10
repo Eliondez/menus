@@ -26,7 +26,5 @@ class MenuItemSerializer(serializers.ModelSerializer):
         return MenuTypeSerializer(obj.item_type).data
 
     def get_cover(self, obj):
-        return obj.images.first()
-
-
-
+        image = obj.images.first()
+        return image.image.url if image else None
