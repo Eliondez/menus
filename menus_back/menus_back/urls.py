@@ -23,8 +23,10 @@ from menu import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/menu/', views.MenuListView.as_view()),
-    path('api/menu/detail/', views.MenuParamsView.as_view()),
+    path('api/restaurants/', views.MenuRestaurantListView.as_view()),
+    path('api/order_create/', views.OrderCreate.as_view()),
+    path('api/order/', views.OrderDetail.as_view()),
+    path('api/menu/detail/', views.MenuDetailView.as_view()),
     path('api/menu/categories/', views.MenuCategoryListView.as_view()),
 ]
 

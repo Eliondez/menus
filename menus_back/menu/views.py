@@ -1,21 +1,20 @@
-import io
-import json
-
 from rest_framework import views, response
+from rest_framework import exceptions
 
-from . import models as menu_models
+from . import models as mm
 from . import serializers
-
-FILE_NAME = 'menu.json'
 
 
 class GetMenuMixin:
     @property
     def menu(self):
-        return menu_models.Menu.objects.first()
+        menu_id = self.request.query_params.get('menu_id')
+        if not menu_id:
+            raise exceptions.ValidationError('Param "menu_id:int" is required.')
+        return mm.Menu.objects.get(id=menu_id)
 
 
-class MenuParamsView(views.APIView, GetMenuMixin):
+class MenuDetailView(views.APIView, GetMenuMixin):
 
     def get(self, request, format=None):
         menu = self.menu
@@ -37,22 +36,87 @@ class MenuParamsView(views.APIView, GetMenuMixin):
         })
 
 
-class MenuListView(views.APIView, GetMenuMixin):
-
-    def get(self, request, format=None):
-        menu = self.menu
-        items = menu_models.MenuItem.objects.filter(
-            menu=menu,
-        ).select_related('item_type')
-        serializer_class = serializers.MenuItemSerializer
-        serializer = serializer_class(items, many=True)
-        return response.Response(serializer.data)
-
-
 class MenuCategoryListView(views.APIView):
 
-    def get(self, request, format=None):
-        items = menu_models.MenuItemType.objects.all()
+    def get(self, request, **kwargs):
+        items = mm.MenuItemType.objects.all()
         serializer_class = serializers.MenuTypeSerializer
         serializer = serializer_class(items, many=True)
         return response.Response(serializer.data)
+
+
+class MenuRestaurantListView(views.APIView):
+    def get(self, request, **kwargs):
+        items = mm.Restaurant.objects.all()
+        serializer_class = serializers.RestaurantSerializer
+        serializer = serializer_class(items, many=True)
+        return response.Response(serializer.data)
+
+
+class OrderCreate(views.APIView):
+    def post(self, request, **kwargs):
+        fields = [
+            ['restaurant_id', 'int'],
+            ['table_id', 'str'],
+            ['items', 'list'],
+        ]
+        errors = []
+        for item_name, item_type in fields:
+            if item_name not in request.data:
+                errors.append(
+                    f'Field {item_name}:{item_type} required'
+                )
+        table = mm.Table.objects.filter(
+            num=request.data['table_id'],
+            restaurant_id=request.data['restaurant_id']
+        ).first()
+
+        if errors:
+            return response.Response(
+                {
+                    'errors': errors,
+                },
+                status=400,
+            )
+
+        order = mm.Order.get_for_table(table_num=table.num)
+        for item in request.data['items']:
+            order_item = mm.OrderItem(
+                order=order,
+                product_id=item['id'],
+                count=item['count'],
+            )
+            order_item.save()
+
+        return response.Response({'status': 'OK! :)'})
+
+class OrderDetail(views.APIView):
+    def get(self, request, **kwargs):
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        if not restaurant_id:
+            raise exceptions.ValidationError('Param "restaurant_id:int" is required.')
+        table_id = self.request.query_params.get('table_id')
+        if not table_id:
+            raise exceptions.ValidationError('Param "table_id:int" is required.')
+        table = mm.Table.objects.filter(num=table_id, restaurant_id=restaurant_id).first()
+        if not table:
+            return response.Response(
+                f'Table id={table_id} not found for '
+                f'restaurant_id={restaurant_id}',
+                status=404
+            )
+        order = mm.Order.get_for_table(table_num=table.num)
+        res = {
+            'order_id': order.id,
+            'table': order.table.num,
+            'items': []
+        }
+
+        for item in order.items.all():
+            res['items'].append({
+                'id': item.id,
+                'product': item.product_id,
+                'count': item.count,
+                'status': item.status
+            })
+        return response.Response(res)

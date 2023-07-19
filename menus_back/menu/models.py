@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 from django.db import models
 
 
 class Menu(models.Model):
     name = models.CharField(max_length=256)
     enabled = models.BooleanField(default=True)
+    restaurant = models.ForeignKey(
+        'Restaurant',
+        on_delete=models.RESTRICT,
+        null=True,
+        related_name='menus'
+    )
     currency = models.ForeignKey('Currency', on_delete=models.RESTRICT, null=True)
-
 
     class Meta:
         verbose_name = 'Меню'
@@ -81,3 +88,61 @@ class Currency(models.Model):
 class Restaurant(models.Model):
     name = models.CharField(max_length=256)
     enabled = models.BooleanField(default=True, blank=True)
+    address = models.TextField(null=True)
+    menu = models.ForeignKey(
+        'Menu',
+        on_delete=models.RESTRICT,
+        null=True,
+        related_name='active_restaurants',
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Table(models.Model):
+    num = models.CharField(max_length=128)
+    restaurant = models.ForeignKey('Restaurant', on_delete=models.RESTRICT)
+
+    def __str__(self):
+        return f'{self.num}__{self.restaurant.name}'
+
+
+class Order(models.Model):
+
+    STATUS_IN_WORK = 'in_work'
+    STATUS_COMPLETED = 'completed'
+
+    STATUS_CHOICES = (
+        (STATUS_IN_WORK, 'in_work'),
+        (STATUS_COMPLETED, 'completed'),
+    )
+
+    menu = models.ForeignKey('Menu', on_delete=models.RESTRICT)
+    table = models.ForeignKey('Table', on_delete=models.RESTRICT, null=True)
+
+    @classmethod
+    def get_for_table(cls, table_num: str) -> Order:
+        return cls.objects.first()
+
+
+
+class OrderItem(models.Model):
+
+    STATUS_ORDERED = 'ordered'
+    STATUS_PREPARING = 'preparing'
+    STATUS_DELIVERED = 'delivered'
+
+    STATUS_CHOICES = (
+        (STATUS_ORDERED, 'ordered'),
+        (STATUS_PREPARING, 'preparing'),
+        (STATUS_DELIVERED, 'delivered'),
+    )
+
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey('MenuItem', on_delete=models.RESTRICT)
+    count = models.FloatField(default=1.0)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=128, default=STATUS_ORDERED)
+
+    def __str__(self):
+        return f'Order:{self.order_id} product:{self.product_id} ({self.count})'

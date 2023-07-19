@@ -28,3 +28,9 @@ class MenuItemSerializer(serializers.ModelSerializer):
     def get_cover(self, obj):
         image = obj.images.first()
         return image.image.url if image else None
+
+
+class RestaurantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Restaurant
+        fields = ['id', 'name', 'address', 'menu']
