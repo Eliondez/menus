@@ -36,6 +36,7 @@ class MenuDetailView(views.APIView, GetMenuMixin):
             items.append({
                 'id': item.id,
                 'description': item.description,
+                'name': item.name,
                 'category': {
                     'id': item.item_type.id,
                     'name': item.item_type.name,

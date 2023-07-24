@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9cbb6de4-dc02-4913-b6c0-c32af6b49eb2" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/menus_back/menu/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus_back/menu/views.py" afterDir="false" />
     </list>
@@ -92,8 +91,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.manage" />
       <item itemvalue="Docker.docker-compose.yaml.web: Compose Deployment" />
+      <item itemvalue="Python.manage" />
     </list>
     <recent_temporary>
       <list>
