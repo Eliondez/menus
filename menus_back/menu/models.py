@@ -40,7 +40,11 @@ class MenuItemType(models.Model):
 
 class MenuItem(models.Model):
     name = models.CharField(max_length=256)
-    menu = models.ForeignKey(Menu, on_delete=models.RESTRICT)
+    menu = models.ForeignKey(
+        Menu,
+        on_delete=models.RESTRICT,
+        related_name='items',
+    )
     description = models.TextField(null=True, blank=True)
     enabled = models.BooleanField(default=True)
     item_type = models.ForeignKey(
@@ -68,11 +72,10 @@ class MenuItemPicture(models.Model):
         related_name='images',
     )
     enabled = models.BooleanField(default=True)
-    order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         verbose_name = 'Картинка позиции меню'
-        ordering = ['order', 'pk']
+        ordering = ['pk']
 
 
 class Currency(models.Model):
@@ -93,6 +96,7 @@ class Restaurant(models.Model):
         'Menu',
         on_delete=models.RESTRICT,
         null=True,
+        blank=True,
         related_name='active_restaurants',
     )
 

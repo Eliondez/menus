@@ -28,11 +28,25 @@ class MenuDetailView(views.APIView, GetMenuMixin):
                 'separated': menu.currency.separated,
             }
 
+        items = []
+        for item in menu.items.select_related('item_type').filter(enabled=True):
+            item_image = item.images.first()
+            image_url = item_image.image.url if item_image else None
+
+            items.append({
+                'id': item.id,
+                'description': item.description,
+                'category': item.item_type.name,
+                'price': item.price,
+                'image': image_url,
+            })
+
         return response.Response({
             'id': menu.id,
             'name': menu.name,
             'enabled': menu.enabled,
             'currency': currency_data,
+            'items': items,
         })
 
 
