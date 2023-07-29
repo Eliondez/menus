@@ -19,16 +19,24 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
-from menu import views
+from rest_framework.authtoken import views as drf_views
+from menu import views as menu_views
+from users import views as users_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/restaurants/', views.MenuRestaurantListView.as_view()),
-    path('api/order_create/', views.OrderCreate.as_view()),
-    path('api/order/', views.OrderDetail.as_view()),
-    path('api/menu/detail/', views.MenuDetailView.as_view()),
-    path('api/menu/categories/', views.MenuCategoryListView.as_view()),
+    path('api/restaurant/', menu_views.UserRestaurantView.as_view()),
+    path('api/order_create/', menu_views.OrderCreate.as_view()),
+    path('api/order/', menu_views.OrderDetail.as_view()),
+    path('api/menu/detail/', menu_views.MenuDetailView.as_view()),
+    path('api/menu/categories/', menu_views.MenuItemTypeListView.as_view()),
+]
+
+urlpatterns += [
+    path('api-token-auth/', drf_views.obtain_auth_token)
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [path('auth/tokens/', users_views.TokensListView.as_view())]
+

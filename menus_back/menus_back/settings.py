@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'users',
     'rest_framework',
+    'rest_framework.authtoken',
     'menus_back',
     'menu',
 ]
@@ -80,8 +82,8 @@ DATABASES = {
         'NAME': 'menus',
         'USER': 'postgres',
         'PASSWORD': 'postgres123321',
-        # 'HOST': 'db',
-        'HOST': '62.84.125.174',
+        'HOST': 'db_01',
+        # 'HOST': '62.84.125.174',
         'PORT': '5432',
     }
 }
@@ -134,3 +136,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['http://62.84.125.174:81', 'http://localhost:81']
 CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+
+AUTH_USER_MODEL = "users.User"

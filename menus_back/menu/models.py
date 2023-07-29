@@ -15,7 +15,7 @@ class Menu(models.Model):
     currency = models.ForeignKey('Currency', on_delete=models.RESTRICT, null=True)
 
     class Meta:
-        verbose_name = 'Меню'
+        verbose_name = 'Menu'
 
     def __str__(self):
         return self.name
@@ -24,6 +24,12 @@ class Menu(models.Model):
 class MenuItemType(models.Model):
     name = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
+    restaurant = models.ForeignKey(
+        'Restaurant',
+        on_delete=models.RESTRICT,
+        null=True,
+        related_name='types'
+    )
     image = models.ImageField(
         upload_to='categories/images',
         null=True,
@@ -31,7 +37,8 @@ class MenuItemType(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Тип позиции меню'
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
         ordering = ['id']
 
     def __str__(self):
@@ -55,7 +62,7 @@ class MenuItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        verbose_name = 'Позициия меню'
+        verbose_name = 'Item'
         ordering = ['item_type', 'id']
 
     def __str__(self):
@@ -74,7 +81,7 @@ class MenuItemPicture(models.Model):
     enabled = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name = 'Картинка позиции меню'
+        verbose_name = 'Item image'
         ordering = ['pk']
 
 
@@ -103,6 +110,10 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Restaurant'
+        ordering = ['pk']
+
 
 class Table(models.Model):
     num = models.CharField(max_length=128)
@@ -111,6 +122,9 @@ class Table(models.Model):
     def __str__(self):
         return f'{self.num}__{self.restaurant.name}'
 
+    class Meta:
+        verbose_name = 'Table'
+        ordering = ['pk']
 
 class Order(models.Model):
 
@@ -129,6 +143,9 @@ class Order(models.Model):
     def get_for_table(cls, table_num: str) -> Order:
         return cls.objects.first()
 
+    class Meta:
+        verbose_name = 'Order'
+        ordering = ['pk']
 
 
 class OrderItem(models.Model):
@@ -150,3 +167,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'Order:{self.order_id} product:{self.product_id} ({self.count})'
+
+    class Meta:
+        verbose_name = 'Order item'
+        ordering = ['pk']

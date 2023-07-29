@@ -51,10 +51,11 @@ class MenuDetailView(views.APIView, GetMenuMixin):
             'enabled': menu.enabled,
             'currency': currency_data,
             'items': items,
+            'restaurant': {},
         })
 
 
-class MenuCategoryListView(views.APIView):
+class MenuItemTypeListView(views.APIView):
 
     def get(self, request, **kwargs):
         items = mm.MenuItemType.objects.all()
@@ -63,11 +64,15 @@ class MenuCategoryListView(views.APIView):
         return response.Response(serializer.data)
 
 
-class MenuRestaurantListView(views.APIView):
+class UserRestaurantView(views.APIView):
     def get(self, request, **kwargs):
-        items = mm.Restaurant.objects.all()
+        user = request.user
+        if not user.is_authenticated:
+            return response.Response({'message': 'Anon'})
+        if not user.restaurant:
+            return response.Response({'message': 'User has no resTAUrant'})
         serializer_class = serializers.RestaurantSerializer
-        serializer = serializer_class(items, many=True)
+        serializer = serializer_class(user.restaurant)
         return response.Response(serializer.data)
 
 

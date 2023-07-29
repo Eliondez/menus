@@ -5,8 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9cbb6de4-dc02-4913-b6c0-c32af6b49eb2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/menus_back/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0002_alter_menuitem_options_menuitemtype_description_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0003_currency_restaurant_menu_currency.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0004_order_table_orderitem.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0005_menu_restaurant_order_table.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0006_restaurant_address_restaurant_currency.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0007_remove_menu_currency_restaurant_menu_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0008_remove_restaurant_currency_menu_currency.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/migrations/0009_alter_menuitempicture_options_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menu/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus_back/menu/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/menus_back/menu/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus_back/menu/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menus_back/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus_back/menus_back/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/menus_back/menus_back/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus_back/menus_back/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +58,7 @@
       <recent name="C:\Projects\django\menus" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Projects\django\menus\menus_back" />
       <recent name="C:\Projects\django\menus" />
     </key>
   </component>
