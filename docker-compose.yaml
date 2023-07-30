@@ -7,7 +7,7 @@ services:
     expose:
       - 8001
     depends_on:
-      - db_01
+      - db0001
     volumes:
       - .:/code
     ports:
@@ -26,7 +26,7 @@ services:
     networks:
       - django_network
 
-  db_01:
+  db0001:
     image: "postgres:15-bullseye"
     restart: always
     volumes:
