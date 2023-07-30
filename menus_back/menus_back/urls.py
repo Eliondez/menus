@@ -25,11 +25,11 @@ from users import views as users_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/restaurant/', menu_views.UserRestaurantView.as_view()),
+    path('api/my_restaurant/', menu_views.UserRestaurantView.as_view()),
+    path('api/client/menus/<int:menu_id>/', menu_views.MenuDetailView.as_view()),
+    path('api/client/restaurants/<int:restaurant_id>/', menu_views.ClientRestaurantsView.as_view()),
     path('api/order_create/', menu_views.OrderCreate.as_view()),
     path('api/order/', menu_views.OrderDetail.as_view()),
-    path('api/menu/detail/', menu_views.MenuDetailView.as_view()),
-    path('api/menu/categories/', menu_views.MenuItemTypeListView.as_view()),
 ]
 
 urlpatterns += [

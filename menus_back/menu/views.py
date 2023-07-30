@@ -16,8 +16,10 @@ class GetMenuMixin:
 
 class MenuDetailView(views.APIView, GetMenuMixin):
 
-    def get(self, request, format=None):
-        menu = self.menu
+    def get(self, request, menu_id, format=None):
+        if not menu_id:
+            raise exceptions.ValidationError('Param "menu_id:int" is required.')
+        menu = mm.Menu.objects.get(id=menu_id)
 
         currency_data = None
         if menu.currency:
@@ -29,6 +31,7 @@ class MenuDetailView(views.APIView, GetMenuMixin):
             }
 
         items = []
+        categories = {}
         for item in menu.items.select_related('item_type').filter(enabled=True):
             item_image = item.images.first()
             image_url = item_image.image.url if item_image else None
@@ -37,13 +40,18 @@ class MenuDetailView(views.APIView, GetMenuMixin):
                 'id': item.id,
                 'description': item.description,
                 'name': item.name,
-                'category': {
-                    'id': item.item_type.id,
-                    'name': item.item_type.name,
-                },
+                'category': item.item_type_id,
                 'price': item.price,
                 'image': image_url,
             })
+
+            if item.item_type_id not in categories:
+                categories[item.item_type_id] = {
+                    'id': item.item_type_id,
+                    'name': item.item_type.name,
+                    'description': item.item_type.description,
+                    'image': item.item_type.image.url if item.item_type.image else None,
+                }
 
         return response.Response({
             'id': menu.id,
@@ -51,17 +59,8 @@ class MenuDetailView(views.APIView, GetMenuMixin):
             'enabled': menu.enabled,
             'currency': currency_data,
             'items': items,
-            'restaurant': {},
+            'categories': categories,
         })
-
-
-class MenuItemTypeListView(views.APIView):
-
-    def get(self, request, **kwargs):
-        items = mm.MenuItemType.objects.all()
-        serializer_class = serializers.MenuTypeSerializer
-        serializer = serializer_class(items, many=True)
-        return response.Response(serializer.data)
 
 
 class UserRestaurantView(views.APIView):
@@ -73,6 +72,19 @@ class UserRestaurantView(views.APIView):
             return response.Response({'message': 'User has no resTAUrant'})
         serializer_class = serializers.RestaurantSerializer
         serializer = serializer_class(user.restaurant)
+        return response.Response(serializer.data)
+
+
+class ClientRestaurantsView(views.APIView):
+    def get(self, request, restaurant_id, **kwargs):
+        restaurant = mm.Restaurant.objects.filter(id=restaurant_id).first()
+        if not restaurant:
+            return response.Response(
+                f'Restaurant_id={restaurant_id} not found',
+                status=404
+            )
+        serializer_class = serializers.RestaurantSerializer
+        serializer = serializer_class(restaurant)
         return response.Response(serializer.data)
 
 
