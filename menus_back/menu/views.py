@@ -88,7 +88,8 @@ class ClientRestaurantsView(views.APIView):
         return response.Response(serializer.data)
 
 
-class OrderCreate(views.APIView):
+class OrderView(views.APIView):
+
     def post(self, request, **kwargs):
         fields = [
             ['restaurant_id', 'int'],
@@ -101,20 +102,15 @@ class OrderCreate(views.APIView):
                 errors.append(
                     f'Field {item_name}:{item_type} required'
                 )
-        table = mm.Table.objects.filter(
-            num=request.data['table_id'],
-            restaurant_id=request.data['restaurant_id']
-        ).first()
-
         if errors:
-            return response.Response(
-                {
-                    'errors': errors,
-                },
-                status=400,
-            )
+            return response.Response({'errors': errors}, status=400)
 
-        order = mm.Order.get_for_table(table_num=table.num)
+        table = self.get_table(
+            restaurant_id=request.data['restaurant_id'],
+            table_id=request.data['table_id']
+        )
+        order = self.get_order(table=table, can_create=True)
+
         for item in request.data['items']:
             order_item = mm.OrderItem(
                 order=order,
@@ -123,16 +119,20 @@ class OrderCreate(views.APIView):
             )
             order_item.save()
 
-        return response.Response({'status': 'OK! :)'})
+        return self.get_response(order)
 
-class OrderDetail(views.APIView):
-    def get(self, request, **kwargs):
-        restaurant_id = self.request.query_params.get('restaurant_id')
-        if not restaurant_id:
-            raise exceptions.ValidationError('Param "restaurant_id:int" is required.')
-        table_id = self.request.query_params.get('table_id')
-        if not table_id:
-            raise exceptions.ValidationError('Param "table_id:int" is required.')
+    def get_order(self, table: mm.Table, can_create=False):
+        order = mm.Order.get_for_table(table=table)
+        if not order:
+            if can_create:
+                order = mm.Order.objects.create(
+                    table=table,
+                )
+            else:
+                raise exceptions.ValidationError('No order found.')
+        return order
+
+    def get_table(self, restaurant_id: int, table_id: str) -> mm.Table:
         table = mm.Table.objects.filter(num=table_id, restaurant_id=restaurant_id).first()
         if not table:
             return response.Response(
@@ -140,18 +140,78 @@ class OrderDetail(views.APIView):
                 f'restaurant_id={restaurant_id}',
                 status=404
             )
-        order = mm.Order.get_for_table(table_num=table.num)
+        return table
+
+    def get_response(self, order: mm.Order) -> response.Response:
         res = {
             'order_id': order.id,
             'table': order.table.num,
             'items': []
         }
-
-        for item in order.items.all():
-            res['items'].append({
-                'id': item.id,
-                'product': item.product_id,
-                'count': item.count,
-                'status': item.status
-            })
+        items_by_product_id = {}
+        for item in order.items.all().select_related('product'):
+            if item.product_id not in items_by_product_id:
+                items_by_product_id[item.product_id] = {
+                    'product_id': item.product_id,
+                    'name': item.product.name,
+                    'count': 0,
+                    'price': item.product.price,
+                    'order_first_item_id': item.id,
+                }
+            items_by_product_id[item.product_id]['count'] += item.count
+            res['items'] = list(items_by_product_id.values())
         return response.Response(res)
+
+    def get(self, request, **kwargs):
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        if not restaurant_id:
+            raise exceptions.ValidationError('Param "restaurant_id:int" is required.')
+        table_id = self.request.query_params.get('table_id')
+        if not table_id:
+            raise exceptions.ValidationError('Param "table_id:str" is required.')
+        table = self.get_table(restaurant_id, table_id)
+        order = self.get_order(table)
+        return self.get_response(order)
+
+
+class OrderClose(views.APIView):
+
+    def get_table(self, restaurant_id: int, table_id: str) -> mm.Table:
+        table = mm.Table.objects.filter(num=table_id, restaurant_id=restaurant_id).first()
+        if not table:
+            return response.Response(
+                f'Table id={table_id} not found for '
+                f'restaurant_id={restaurant_id}',
+                status=404
+            )
+        return table
+
+    def get_order(self, table: mm.Table, can_create=False):
+        order = mm.Order.get_for_table(table=table)
+        if not order:
+            if can_create:
+                order = mm.Order.objects.create(
+                    table=table,
+                )
+            else:
+                raise exceptions.ValidationError('No order found.')
+        return order
+
+
+    def post(self, request, **kwargs):
+        table = mm.Table.objects.filter(
+            num=request.data['table_id'],
+            restaurant_id=request.data['restaurant_id']
+        ).first()
+        order = mm.Order.get_for_table(table=table)
+        if order:
+            order.status = mm.Order.STATUS_COMPLETED
+            order.save()
+            return response.Response({
+                'status': 'OK'
+            })
+        else:
+            return response.Response({
+                'status': 'Fail',
+                'message': 'No order found'
+            })

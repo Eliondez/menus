@@ -116,7 +116,7 @@ class Restaurant(models.Model):
 
 
 class Table(models.Model):
-    num = models.CharField(max_length=128)
+    num = models.CharField(max_length=128, unique=True)
     restaurant = models.ForeignKey('Restaurant', on_delete=models.RESTRICT)
 
     def __str__(self):
@@ -128,20 +128,20 @@ class Table(models.Model):
 
 class Order(models.Model):
 
-    STATUS_IN_WORK = 'in_work'
-    STATUS_COMPLETED = 'completed'
+    STATUS_IN_WORK = 0
+    STATUS_COMPLETED = 1
 
     STATUS_CHOICES = (
         (STATUS_IN_WORK, 'in_work'),
         (STATUS_COMPLETED, 'completed'),
     )
 
-    menu = models.ForeignKey('Menu', on_delete=models.RESTRICT)
     table = models.ForeignKey('Table', on_delete=models.RESTRICT, null=True)
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_IN_WORK)
 
     @classmethod
-    def get_for_table(cls, table_num: str) -> Order:
-        return cls.objects.first()
+    def get_for_table(cls, table: Table) -> Order:
+        return cls.objects.filter(table=table, status__in=[cls.STATUS_IN_WORK]).first()
 
     class Meta:
         verbose_name = 'Order'
@@ -152,12 +152,10 @@ class OrderItem(models.Model):
 
     STATUS_ORDERED = 'ordered'
     STATUS_PREPARING = 'preparing'
-    STATUS_DELIVERED = 'delivered'
 
     STATUS_CHOICES = (
         (STATUS_ORDERED, 'ordered'),
         (STATUS_PREPARING, 'preparing'),
-        (STATUS_DELIVERED, 'delivered'),
     )
 
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='items')
