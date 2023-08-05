@@ -211,7 +211,10 @@ class OrderCheckout(views.APIView):
             })
 
         pay_type = request.data['pay_type']
-        order.pay_type = int(pay_type) if pay_type else None
+        if pay_type is not None:
+            order.pay_type = int(pay_type)
+        else:
+            order.pay_type = None
         order.save()
         return response.Response({
             'status': 'OK'
