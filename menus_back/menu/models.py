@@ -136,6 +136,15 @@ class Order(models.Model):
         (STATUS_COMPLETED, 'completed'),
     )
 
+    PAY_TYPE_CASH = 0
+    PAY_TYPE_CARD = 1
+
+    PAY_TYPE_CHOICES = (
+        (PAY_TYPE_CASH, 'cash'),
+        (PAY_TYPE_CARD, 'card'),
+    )
+
+    pay_type = models.PositiveSmallIntegerField(choices=PAY_TYPE_CHOICES, null=True, blank=True)
     table = models.ForeignKey('Table', on_delete=models.RESTRICT, null=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_IN_WORK)
 
@@ -145,7 +154,10 @@ class Order(models.Model):
 
     class Meta:
         verbose_name = 'Order'
-        ordering = ['pk']
+        ordering = ['-pk']
+
+    def __str__(self):
+        return f'{self.table_id}__{self.get_status_display()}'
 
 
 class OrderItem(models.Model):

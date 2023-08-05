@@ -176,28 +176,6 @@ class OrderView(views.APIView):
 
 class OrderClose(views.APIView):
 
-    def get_table(self, restaurant_id: int, table_id: str) -> mm.Table:
-        table = mm.Table.objects.filter(num=table_id, restaurant_id=restaurant_id).first()
-        if not table:
-            return response.Response(
-                f'Table id={table_id} not found for '
-                f'restaurant_id={restaurant_id}',
-                status=404
-            )
-        return table
-
-    def get_order(self, table: mm.Table, can_create=False):
-        order = mm.Order.get_for_table(table=table)
-        if not order:
-            if can_create:
-                order = mm.Order.objects.create(
-                    table=table,
-                )
-            else:
-                raise exceptions.ValidationError('No order found.')
-        return order
-
-
     def post(self, request, **kwargs):
         table = mm.Table.objects.filter(
             num=request.data['table_id'],
@@ -215,3 +193,52 @@ class OrderClose(views.APIView):
                 'status': 'Fail',
                 'message': 'No order found'
             })
+
+
+class OrderCheckout(views.APIView):
+    def post(self, request, **kwargs):
+        if 'pay_type' not in request.data:
+            raise exceptions.ValidationError('Param "pay_type:int" is required.')
+        table = mm.Table.objects.filter(
+            num=request.data['table_id'],
+            restaurant_id=request.data['restaurant_id']
+        ).first()
+        order = mm.Order.get_for_table(table=table)
+        if not order:
+            return response.Response({
+                'status': 'Fail',
+                'message': 'No order found'
+            })
+
+        pay_type = request.data['pay_type']
+        order.pay_type = int(pay_type) if pay_type else None
+        order.save()
+        return response.Response({
+            'status': 'OK'
+        })
+
+
+class ManagerOrderView(views.APIView):
+
+    def get(self, request, **kwargs):
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        if not restaurant_id:
+            raise exceptions.ValidationError('Param "restaurant_id:int" is required.')
+
+        filter_data = {
+            'table__restaurant_id': restaurant_id,
+            'status': mm.Order.STATUS_IN_WORK,
+        }
+        orders_data = mm.Order.objects.filter(**filter_data)
+
+        orders = []
+        for order in orders_data:
+            orders.append({
+                'table_id': order.table_id,
+                'order_id': order.id,
+                'pay_type': order.get_pay_type_display(),
+                'items_count': order.items.count(),
+            })
+        return response.Response({
+            'orders': orders,
+        })

@@ -28,8 +28,11 @@ urlpatterns = [
     path('api/my_restaurant/', menu_views.UserRestaurantView.as_view()),
     path('api/client/order/', menu_views.OrderView.as_view()),
     path('api/client/order/close/', menu_views.OrderClose.as_view()),
+    path('api/client/order/checkout/', menu_views.OrderCheckout.as_view()),
     path('api/client/menus/<int:menu_id>/', menu_views.MenuDetailView.as_view()),
     path('api/client/restaurants/<int:restaurant_id>/', menu_views.ClientRestaurantsView.as_view()),
+
+    path('api/manager/order/', menu_views.ManagerOrderView.as_view()),
 ]
 
 urlpatterns += [
