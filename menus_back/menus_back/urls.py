@@ -33,6 +33,8 @@ urlpatterns = [
     path('api/client/restaurants/<int:restaurant_id>/', menu_views.ClientRestaurantsView.as_view()),
 
     path('api/manager/order/', menu_views.ManagerOrderView.as_view()),
+    path('api/manager/me/', menu_views.ManagerInfoView.as_view()),
+
 ]
 
 urlpatterns += [

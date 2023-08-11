@@ -221,12 +221,25 @@ class OrderCheckout(views.APIView):
         })
 
 
-class ManagerOrderView(views.APIView):
+class ManagerView(views.APIView):
+    def get_restaurant_id(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return response.Response(status=401)
+
+        restaurant_id = user.restaurant_id
+        if not restaurant_id:
+            return response.Response(
+                f'user "{user.username}" has no restaurant',
+                status=400
+            )
+        return restaurant_id
+
+
+class ManagerOrderView(ManagerView):
 
     def get(self, request, **kwargs):
-        restaurant_id = self.request.query_params.get('restaurant_id')
-        if not restaurant_id:
-            raise exceptions.ValidationError('Param "restaurant_id:int" is required.')
+        restaurant_id = self.get_restaurant_id()
 
         filter_data = {
             'table__restaurant_id': restaurant_id,
@@ -245,3 +258,20 @@ class ManagerOrderView(views.APIView):
         return response.Response({
             'orders': orders,
         })
+
+class ManagerInfoView(ManagerView):
+
+    def get(self, request, **kwargs):
+        restaurant_id = self.get_restaurant_id()
+        restaurant = mm.Restaurant.objects.get(id=restaurant_id)
+        return response.Response({
+            'user': {
+                'username': request.user.username,
+            },
+            'restaurant': {
+                'id': restaurant_id,
+                'name': restaurant.name,
+            },
+        })
+
+
