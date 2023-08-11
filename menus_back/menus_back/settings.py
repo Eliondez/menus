@@ -82,8 +82,8 @@ DATABASES = {
         'NAME': 'menus',
         'USER': 'postgres',
         'PASSWORD': 'postgres123321',
-        # 'HOST': 'db0001',
-        'HOST': '62.84.125.174',
+        'HOST': 'db0001',
+        # 'HOST': '62.84.125.174',
         'PORT': '5432',
     }
 }
